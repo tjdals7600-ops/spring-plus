@@ -11,10 +11,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SignupRequest {
 
+    //level 1-2 → 닉네임 추가
     @NotBlank @Email
     private String email;
     @NotBlank
     private String password;
     @NotBlank
     private String userRole;
+    @NotBlank
+    private String nickname;
 }

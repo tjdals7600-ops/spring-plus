@@ -10,7 +10,13 @@ import org.example.expert.domain.todo.dto.response.TodoSaveResponse;
 import org.example.expert.domain.todo.service.TodoService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestParam;
+import java.time.LocalDateTime;
+
+//import static com.sun.beans.introspect.PropertyInfo.Name.required;
+//import static jdk.internal.jrtfs.JrtFileAttributeView.AttrID.size;
 
 @RestController
 @RequiredArgsConstructor
@@ -18,20 +24,28 @@ public class TodoController {
 
     private final TodoService todoService;
 
+    // 과제 level 1-1 → insert into todos를 실행하려는데 TodoService에 있는 saveTodo
+    // 메서드에 Transactional이 읽기 전용(readOnly = true)이기 때문에 발생한 오류
+
     @PostMapping("/todos")
     public ResponseEntity<TodoSaveResponse> saveTodo(
-            @Auth AuthUser authUser,
+            @AuthenticationPrincipal AuthUser authUser,
             @Valid @RequestBody TodoSaveRequest todoSaveRequest
     ) {
         return ResponseEntity.ok(todoService.saveTodo(authUser, todoSaveRequest));
     }
 
+
+    // level 1-3 동적 검색 조건 문제
     @GetMapping("/todos")
     public ResponseEntity<Page<TodoResponse>> getTodos(
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size
-    ) {
-        return ResponseEntity.ok(todoService.getTodos(page, size));
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String weather,
+            @RequestParam(required = false) LocalDateTime startDate,
+            @RequestParam(required = false) LocalDateTime endDate
+            ) {
+        return ResponseEntity.ok(todoService.getTodos(page, size, weather, startDate, endDate));
     }
 
     @GetMapping("/todos/{todoId}")
